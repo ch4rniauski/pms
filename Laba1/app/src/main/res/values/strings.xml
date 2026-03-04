@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Laba1</string>
+    <string name="title_activity_cooking">CookingActivity</string>
+    <string name="title_activity_ingredients">IngredientsActivity</string>
 </resources>
