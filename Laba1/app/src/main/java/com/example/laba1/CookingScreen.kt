@@ -1,33 +1,28 @@
 package com.example.laba1
 
-import android.app.Activity
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
-class CookingActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val title = intent.getStringExtra("title") ?: ""
-        val steps = intent.getSerializableExtra("steps") as ArrayList<RecipeStep>
-
-        setContent {
-            CookingScreen(title, steps, this)
-        }
-    }
-}
-
 @Composable
-fun CookingScreen(title: String, steps: List<RecipeStep>, activity: Activity) {
+fun CookingScreen(
+    title: String,
+    steps: List<RecipeStep>,
+    onBack: () -> Unit
+) {
+    if (steps.isEmpty()) {
+        Text("Ошибка: нет шагов рецепта")
+        return
+    }
+
+    val context = LocalContext.current
+
     var step by remember { mutableIntStateOf(0) }
-    var timeLeft by remember { mutableIntStateOf(steps[0].duration) }
+    var timeLeft by remember { mutableIntStateOf(steps.first().duration) }
     var running by remember { mutableStateOf(false) }
 
     LaunchedEffect(running, timeLeft) {
@@ -67,11 +62,11 @@ fun CookingScreen(title: String, steps: List<RecipeStep>, activity: Activity) {
 
         Button(onClick = {
             showNotification(
-                activity,
+                context,
                 "Возврат на главный экран",
                 "Вы вернулись в кулинарную книгу"
             )
-            activity.finish()
+            onBack()
         }) {
             Text("Назад")
         }
