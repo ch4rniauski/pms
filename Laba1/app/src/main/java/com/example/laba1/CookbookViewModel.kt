@@ -4,11 +4,12 @@ import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.laba1.data.AppDatabase
+import com.example.laba1.data.RecipeRepository
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class CookbookViewModel(application: Application) : AndroidViewModel(application) {
-
     private val repository: RecipeRepository
 
     val recipes = mutableStateListOf<Recipe>()
