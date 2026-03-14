@@ -1,24 +1,55 @@
 package com.example.laba1
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.laba1.data.AppDatabase
+import com.example.laba1.data.RecipeRepository
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class CookbookViewModel : ViewModel() {
+class CookbookViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository: RecipeRepository
+
     val recipes = mutableStateListOf<Recipe>()
-    private var nextId = 1
+
+    init {
+        val db = AppDatabase.getDatabase(application)
+        repository = RecipeRepository(db.recipeDao())
+
+        viewModelScope.launch {
+            repository.recipes.collectLatest { list ->
+                recipes.clear()
+                recipes.addAll(list)
+            }
+        }
+    }
 
     fun addRecipe(title: String, steps: List<RecipeStep>) {
-        recipes.add(Recipe(nextId++, title, steps))
+        viewModelScope.launch {
+            repository.addRecipe(
+                Recipe(
+                    id = 0,
+                    title = title,
+                    steps = steps,
+                    isFavorite = false
+                )
+            )
+        }
     }
 
     fun toggleFavorite(id: Int) {
-        recipes.replaceAll {
-            if (it.id == id) it.copy(isFavorite = !it.isFavorite)
-            else it
+        val recipe = recipes.find { it.id == id } ?: return
+        viewModelScope.launch {
+            repository.toggleFavorite(recipe)
         }
     }
 
     fun deleteRecipe(id: Int) {
-        recipes.removeAll { it.id == id }
+        val recipe = recipes.find { it.id == id } ?: return
+        viewModelScope.launch {
+            repository.deleteRecipe(recipe)
+        }
     }
 }
