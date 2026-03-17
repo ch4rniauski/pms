@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "218435708176",
+    "project_id": "cookingbook-e03a3",
+    "storage_bucket": "cookingbook-e03a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218435708176:android:91cb51e85661ac23f37195",
+        "android_client_info": {
+          "package_name": "com.example.laba1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOQqQtLwHKx7lK7uCv8TK6xldovLCwTu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

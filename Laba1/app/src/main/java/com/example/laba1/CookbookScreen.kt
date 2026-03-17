@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,13 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.laba1.auth.AuthViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CookbookScreen(
     viewModel: CookbookViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
     onOpenRecipe: (Recipe) -> Unit,
-    onOpenIngredients: () -> Unit
+    onOpenIngredients: () -> Unit,
+    onSignOut: () -> Unit
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -33,11 +38,22 @@ fun CookbookScreen(
     var stepDuration by remember { mutableStateOf("") }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Кулинарная книга") },
+                actions = {
+                    IconButton(onClick = {
+                        authViewModel.signOut()
+                        onSignOut()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Sign Out")
+                    }
+                }
+            )
+        }
     ) { padding ->
         Column(Modifier.padding(padding).padding(16.dp)) {
-
-            Text("Кулинарная книга", style = MaterialTheme.typography.headlineMedium)
 
             Spacer(Modifier.height(8.dp))
 
@@ -80,7 +96,7 @@ fun CookbookScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            LazyColumn {
+            LazyColumn(modifier = Modifier.heightIn(max = 150.dp)) {
                 items(newSteps) { s ->
                     Text("• ${s.title} (${s.duration} сек)")
                 }
@@ -106,7 +122,7 @@ fun CookbookScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn {
+            LazyColumn(modifier = Modifier.weight(1f)) {
                 items(recipes) { recipe ->
                     Row(
                         Modifier

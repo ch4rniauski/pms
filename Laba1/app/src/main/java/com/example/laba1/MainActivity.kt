@@ -11,9 +11,14 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.example.laba1.ui.theme.Laba1Theme
 
 const val CHANNEL_ID = "cookbook_channel"
 
@@ -34,7 +39,14 @@ class MainActivity : ComponentActivity() {
         createNotificationChannel()
 
         setContent {
-            AppNavigation()
+            Laba1Theme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AppNavigation()
+                }
+            }
         }
     }
 
