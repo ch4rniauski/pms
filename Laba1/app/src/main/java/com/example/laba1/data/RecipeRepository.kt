@@ -9,14 +9,15 @@ class RecipeRepository(
     private val dao: RecipeDao
 ) {
 
-    val recipes: Flow<List<Recipe>> =
-        dao.getAllRecipesWithSteps().map { list ->
+    fun getRecipes(userId: String): Flow<List<Recipe>> =
+        dao.getAllRecipesWithSteps(userId).map { list ->
             list.map { it.toDomain() }
         }
 
-    suspend fun addRecipe(recipe: Recipe) {
+    suspend fun addRecipe(recipe: Recipe, userId: String) {
         val recipeId = dao.insertRecipe(
             RecipeEntity(
+                userId = userId,
                 title = recipe.title,
                 isFavorite = recipe.isFavorite
             )
@@ -34,21 +35,23 @@ class RecipeRepository(
         }
     }
 
-    suspend fun toggleFavorite(recipe: Recipe) {
+    suspend fun toggleFavorite(recipe: Recipe, userId: String) {
         dao.updateRecipe(
             RecipeEntity(
                 id = recipe.id,
+                userId = userId,
                 title = recipe.title,
                 isFavorite = !recipe.isFavorite
             )
         )
     }
 
-    suspend fun deleteRecipe(recipe: Recipe) {
+    suspend fun deleteRecipe(recipe: Recipe, userId: String) {
         dao.deleteStepsForRecipe(recipe.id)
         dao.deleteRecipe(
             RecipeEntity(
                 id = recipe.id,
+                userId = userId,
                 title = recipe.title,
                 isFavorite = recipe.isFavorite
             )

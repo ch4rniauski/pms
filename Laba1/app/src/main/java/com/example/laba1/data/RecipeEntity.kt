@@ -9,6 +9,7 @@ import androidx.room.Index
 data class RecipeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val userId: String, // ID пользователя из Firebase
     val title: String,
     val isFavorite: Boolean = false
 )

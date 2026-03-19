@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.Flow
 interface RecipeDao {
 
     @Transaction
-    @Query("SELECT * FROM recipes ORDER BY title ASC")
-    fun getAllRecipesWithSteps(): Flow<List<RecipeWithSteps>>
+    @Query("SELECT * FROM recipes WHERE userId = :userId ORDER BY title ASC")
+    fun getAllRecipesWithSteps(userId: String): Flow<List<RecipeWithSteps>>
 
     @Transaction
     @Query("SELECT * FROM recipes WHERE id = :id")

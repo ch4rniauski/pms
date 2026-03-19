@@ -9,9 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.laba1.data.AppDatabase
 import com.example.laba1.data.RecipeRepository
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.functions.functions
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -20,19 +22,16 @@ import kotlinx.coroutines.withContext
 class CookbookViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: RecipeRepository
     private val functions = Firebase.functions
+    private val auth = Firebase.auth
 
     val recipes = mutableStateListOf<Recipe>()
+    private var recipesJob: Job? = null
 
     init {
         val db = AppDatabase.getDatabase(application)
         repository = RecipeRepository(db.recipeDao())
 
-        viewModelScope.launch {
-            repository.recipes.collectLatest { list ->
-                recipes.clear()
-                recipes.addAll(list)
-            }
-        }
+        observeRecipes()
         
         FirebaseMessaging.getInstance().subscribeToTopic("cooking")
             .addOnCompleteListener { task ->
@@ -40,11 +39,25 @@ class CookbookViewModel(application: Application) : AndroidViewModel(application
             }
     }
 
+    private fun observeRecipes() {
+        recipesJob?.cancel()
+        val userId = auth.currentUser?.uid ?: return
+        
+        recipesJob = viewModelScope.launch {
+            repository.getRecipes(userId).collectLatest { list ->
+                recipes.clear()
+                recipes.addAll(list)
+            }
+        }
+    }
+
     fun addRecipe(title: String, steps: List<RecipeStep>) {
+        val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
             try {
                 repository.addRecipe(
-                    Recipe(id = 0, title = title, steps = steps, isFavorite = false)
+                    Recipe(id = 0, title = title, steps = steps, isFavorite = false),
+                    userId
                 )
                 
                 // 1. Показываем ЛОКАЛЬНОЕ уведомление сразу (для текущего пользователя)
@@ -75,12 +88,19 @@ class CookbookViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun toggleFavorite(id: Int) {
+        val userId = auth.currentUser?.uid ?: return
         val recipe = recipes.find { it.id == id } ?: return
-        viewModelScope.launch { repository.toggleFavorite(recipe) }
+        viewModelScope.launch { repository.toggleFavorite(recipe, userId) }
     }
 
     fun deleteRecipe(id: Int) {
+        val userId = auth.currentUser?.uid ?: return
         val recipe = recipes.find { it.id == id } ?: return
-        viewModelScope.launch { repository.deleteRecipe(recipe) }
+        viewModelScope.launch { repository.deleteRecipe(recipe, userId) }
+    }
+    
+    // Вызывать при смене пользователя (например, после логина)
+    fun refresh() {
+        observeRecipes()
     }
 }
